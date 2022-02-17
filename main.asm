@@ -1,43 +1,58 @@
 
 #importonce
+
 BasicStub(0, "SummerDemo for Vic20", Entry)
 Entry: {
     ChangeScreenColor(%11111111)
+
+    lda $9005
+    ora #$0f
+    sta $9005
+
+    LoadMap();
+
+    ldx #$00
+  !PaintCols:
+    ldy ScreenRam, x
+    lda $1ba0, y
+    sta $9600, x
+    dex
+    bne !PaintCols-
+
+    ldx #$00
+  !PaintCols:
+    ldy ScreenRam + $ff, x
+    lda $1ba0, y
+    sta $96ff, x
+    dex
+    bne !PaintCols-
 
   !:
     jmp !-
 }
 
+.macro LoadMap() {
+    ldx #0
+  !:
+    lda Map, x
+    sta ScreenRam, x
+    dex
+    bne !-
 
-// Expansion:	0,3,8 (Unexpanded, 3K at $0400, 8K+ at $1200)
-// ListMessage:	string to display if program is LISTed
-.macro BasicStub(Expansion, ListMessage, CodeStart) {
-      .if (Expansion == 0)					// Determine BASIC start address
-      {
-        .pc = $1000 "BASIC Stub"			// Unexpanded VIC - BASIC starts at 4096
-      }
-      else .if (Expansion == 3)
-      {
-        .pc = $0400 "BASIC Stub"			// 3K Expanded VIC - BASIC starts at 1024
-      }
-      else
-      {
-        .pc = $1200 "BASIC Stub"			// 8K+ Expanded VIC - BASIC starts at 4608
-      }
-      .byte 0									// Start of BASIC program
-      .word nextline							// Pointer to next BASIC line (Lo/Hi)
-      .word 0									// Line number
-      .byte $9e								// 'SYS'
-      .fill 4, toIntString(begin,4).charAt(i)	// Address of 'begin' as numeric string
-      .word $8f3a								// Colon and 'REM'
-      .fill 13,$14							// {DEL} control characters to hide start of BASIC line
-      .text ListMessage						// Message for LIST
-      .byte 0									// End of BASIC line
-nextline:	.word 0									// End of BASIC program
-begin:		.pc = * "Entry"						// Start of 6502 code
+    ldx #0
+  !:
+    lda Map + $ff, x
+    sta ScreenRam + $ff, x
+    dex
+    bne !-
 }
 
 .macro ChangeScreenColor(color) {
     lda #color
     sta $900f
 }
+
+.label ScreenRam = $1e00
+
+#import "_utils.asm"
+#import "_assets.asm"
