@@ -6,6 +6,8 @@ Entry: {
     Init()
 
   !:
+    jsr WaitForRasterLineZero
+
     jmp !-
 }
 
@@ -56,6 +58,43 @@ Entry: {
 .macro ChangeScreenColor(color) {
     lda #color
     sta $900f
+}
+
+WaitForRasterLineZero: {
+  !:
+    lda $9004
+    bne !-
+
+    inc CurrentFrame
+    lda CurrentFrame
+
+    cmp #20
+    bne !Next+
+
+// 20/60 of seconds
+
+    jmp Done
+  !Next:
+    
+    cmp #40
+    bne !Next+
+
+// 40/60 of seconds
+
+    jmp Done
+  !Next:
+    cmp #60
+    bne Done
+
+// 60/60 of seconds
+
+    lda #0
+    sta CurrentFrame
+
+  Done:
+    rts
+
+  CurrentFrame: .byte 0
 }
 
 .label ScreenRam = $1e00
