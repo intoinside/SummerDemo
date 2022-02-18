@@ -28,3 +28,9 @@
 nextline:	.word 0         // End of BASIC program
 begin:		.pc = * "Entry" // Start of 6502 code
 }
+
+.macro MoveCharsetLocation(location) {
+    lda $9005
+    ora #location
+    sta $9005
+}

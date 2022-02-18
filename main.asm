@@ -3,32 +3,20 @@
 
 BasicStub(0, "SummerDemo for Vic20", Entry)
 Entry: {
-    ChangeScreenColor(%11111111)
-
-    lda $9005
-    ora #$0f
-    sta $9005
-
-    LoadMap();
-
-    ldx #$00
-  !PaintCols:
-    ldy ScreenRam, x
-    lda $1ba0, y
-    sta $9600, x
-    dex
-    bne !PaintCols-
-
-    ldx #$00
-  !PaintCols:
-    ldy ScreenRam + $ff, x
-    lda $1ba0, y
-    sta $96ff, x
-    dex
-    bne !PaintCols-
+    Init()
 
   !:
     jmp !-
+}
+
+.macro Init() {
+    ChangeScreenColor(%11111111)
+
+// Move charset location to $1c00
+    MoveCharsetLocation($0f)
+
+    LoadMap()
+    PaintMap()
 }
 
 .macro LoadMap() {
@@ -39,12 +27,30 @@ Entry: {
     dex
     bne !-
 
-    ldx #0
+    ldx #$fc
   !:
     lda Map + $ff, x
     sta ScreenRam + $ff, x
     dex
     bne !-
+}
+
+.macro PaintMap() {
+    ldx #$00
+  !PaintCols:
+    ldy ScreenRam, x
+    lda CharsetColorMap, y
+    sta $9600, x
+    dex
+    bne !PaintCols-
+
+    ldx #$fc
+  !PaintCols:
+    ldy ScreenRam + $ff, x
+    lda CharsetColorMap, y
+    sta $96ff, x
+    dex
+    bne !PaintCols-
 }
 
 .macro ChangeScreenColor(color) {

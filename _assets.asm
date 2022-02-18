@@ -1,7 +1,8 @@
 
 #importonce
 
-* = $1ba0 "Color map"
+* = $1a00 "CharsetColor map"
+CharsetColorMap:
   .import binary "assets/assets - CharAttribs.bin"
 
 * = $1c00 "Charset"
