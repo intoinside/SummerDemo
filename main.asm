@@ -55,9 +55,68 @@ Entry: {
     bne !PaintCols-
 }
 
-.macro ChangeScreenColor(color) {
-    lda #color
-    sta $900f
+DrawWave: {
+    lda CrestOfWave
+    sta UpdateCurrentChar + 1
+    lda CrestOfWave + 1
+    sta UpdateCurrentChar + 2
+
+// Replace current crest with original char
+    lda CharSaved
+  UpdateCurrentChar:
+    sta $beef    
+
+    lda CrestCount
+    cmp #5
+    beq ResetWave
+
+// Get next crest position
+    sub16byte(23, CrestOfWave)
+
+// Save next char that will be replaced by crest
+    lda CrestOfWave
+    sta ReadNextChar + 1
+    sta UpdateNextChar + 1
+    lda CrestOfWave + 1
+    sta ReadNextChar + 2
+    sta UpdateNextChar + 2
+
+  ReadNextChar:
+    lda $beef
+    sta CharSaved
+
+// Draw new crest
+    lda #Crest
+  UpdateNextChar:
+    sta $beef
+    inc CrestCount
+    jmp Done
+
+  ResetWave:
+    lda #0
+    sta CrestCount
+
+    lda FirstCrestOfWave
+    sta CrestOfWave
+    lda FirstCrestOfWave + 1
+    sta CrestOfWave + 1
+
+  Done:
+    rts
+
+    .label FirstCrestOfWave = ScreenRam + (22 * 22)
+    CrestOfWave: .word FirstCrestOfWave
+    CharSaved: .byte 18
+
+    .label Crest = 19;
+
+    CrestCount: .byte $00
+}
+
+TimerTick: {
+    jsr DrawWave
+
+    rts
 }
 
 WaitForRasterLineZero: {
@@ -66,27 +125,17 @@ WaitForRasterLineZero: {
     bne !-
 
     inc CurrentFrame
+
     lda CurrentFrame
+    lsr
+    lsr 
+    lsr
+    lsr 
+    lsr 
+    lsr 
+    bcc Done
 
-    cmp #20
-    bne !Next+
-
-// 20/60 of seconds
-
-    jmp Done
-  !Next:
-    
-    cmp #40
-    bne !Next+
-
-// 40/60 of seconds
-
-    jmp Done
-  !Next:
-    cmp #60
-    bne Done
-
-// 60/60 of seconds
+    jsr TimerTick
 
     lda #0
     sta CurrentFrame

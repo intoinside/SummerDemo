@@ -1,6 +1,24 @@
 
 #importonce
 
+.macro sub16byte(value, dest) {
+    sec
+    lda dest
+    sbc value
+    sta dest
+    lda dest + 1
+    sbc #$00
+    sta dest + 1
+}
+.assert "sub16byte($cc, $0123) ", { sub16byte($cc, $0123) }, {
+  sec; lda $0123; sbc $cc; sta $0123; lda $0124; sbc #$00; sta $0124
+}
+
+.macro ChangeScreenColor(color) {
+    lda #color
+    sta $900f
+}
+
 // Expansion:	0,3,8 (Unexpanded, 3K at $0400, 8K+ at $1200)
 // ListMessage:	string to display if program is LISTed
 .macro BasicStub(Expansion, ListMessage, CodeStart) {
