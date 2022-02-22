@@ -1,6 +1,19 @@
 
 #importonce
 
+.macro add16immediate(value, dest) {
+    clc
+    lda dest
+    adc #value
+    sta dest
+    bcc !+
+    inc dest + 1
+  !:
+}
+.assert "add16immediate($cc, $0123) ", { add16immediate($cc, $0123) }, {
+  clc; lda $0123; adc #$cc; sta $0123; bcc !+; inc $0124; !:
+}
+
 .macro sub16byte(value, dest) {
     sec
     lda dest

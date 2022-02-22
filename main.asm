@@ -5,6 +5,8 @@ BasicStub(0, "SummerDemo for Vic20", Entry)
 Entry: {
     Init()
 
+    InitWave(8)
+
   !:
     jsr WaitForRasterLineZero
 
@@ -55,6 +57,18 @@ Entry: {
     bne !PaintCols-
 }
 
+.macro InitWave(column) {
+    lda #<DrawWave.FirstCrestOfWave
+    sta DrawWave.CrestOfWave
+    lda #>DrawWave.FirstCrestOfWave + 1
+    sta DrawWave.CrestOfWave + 1
+
+    lda #0
+    sta DrawWave.CrestCount
+
+    add16immediate(column, DrawWave.CrestOfWave)
+}
+
 DrawWave: {
     lda CrestOfWave
     sta UpdateCurrentChar + 1
@@ -67,8 +81,8 @@ DrawWave: {
     sta $beef    
 
     lda CrestCount
-    cmp #5
-    beq ResetWave
+    cmp #6
+    beq Done
 
 // Get next crest position
     sub16byte(23, CrestOfWave)
@@ -92,24 +106,22 @@ DrawWave: {
     inc CrestCount
     jmp Done
 
-  ResetWave:
-    lda #0
-    sta CrestCount
-
-    lda FirstCrestOfWave
-    sta CrestOfWave
-    lda FirstCrestOfWave + 1
-    sta CrestOfWave + 1
-
   Done:
     rts
 
+    // Starting crest of wave position
     .label FirstCrestOfWave = ScreenRam + (22 * 22)
-    CrestOfWave: .word FirstCrestOfWave
-    CharSaved: .byte 18
 
+    // Wave char
     .label Crest = 19;
 
+    // Current crest of wave position
+    CrestOfWave: .word FirstCrestOfWave
+
+    // Used to save original char before wave comes
+    CharSaved: .byte 18
+
+    // Current crest step from beginning
     CrestCount: .byte $00
 }
 
