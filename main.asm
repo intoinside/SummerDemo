@@ -60,7 +60,7 @@ Entry: {
 .macro InitWave(column) {
     lda #<DrawWave.FirstCrestOfWave
     sta DrawWave.CrestOfWave
-    lda #>DrawWave.FirstCrestOfWave + 1
+    lda #>DrawWave.FirstCrestOfWave
     sta DrawWave.CrestOfWave + 1
 
     lda #0
@@ -81,7 +81,7 @@ DrawWave: {
     sta $beef    
 
     lda CrestCount
-    cmp #6
+    cmp #WaveLength
     beq Done
 
 // Get next crest position
@@ -110,7 +110,10 @@ DrawWave: {
     rts
 
     // Starting crest of wave position
-    .label FirstCrestOfWave = ScreenRam + (22 * 22)
+    .label FirstCrestOfWave = ScreenRam + (23 * 22)
+
+    // Wave length from bottom to crest
+    .label WaveLength = 7
 
     // Wave char
     .label Crest = 19;
