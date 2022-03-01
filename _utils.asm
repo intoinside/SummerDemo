@@ -1,6 +1,16 @@
 
 #importonce
 
+.macro add16byte(value, dest) {
+    clc
+    lda dest
+    adc value
+    sta dest
+    bcc !+
+    inc dest + 1
+  !:
+}
+
 .macro add16immediate(value, dest) {
     clc
     lda dest
@@ -25,6 +35,31 @@
 }
 .assert "sub16byte($cc, $0123) ", { sub16byte($cc, $0123) }, {
   sec; lda $0123; sbc $cc; sta $0123; lda $0124; sbc #$00; sta $0124
+}
+
+// Generates a random number up to maxNumber (excluded)
+.macro GetRandomUpTo(maxNumber) {
+    lda #maxNumber
+    sta GetRandom.GeneratorMax
+    jsr GetRandom
+}
+
+GetRandom: {
+    lda #$01
+    asl               
+    bcc Skip         
+    eor #$4d  
+
+  Skip:            
+    sta GetRandom + 1
+    eor $9124
+
+    cmp GeneratorMax
+    bmi GetRandom
+
+    rts
+
+    GeneratorMax: .byte 0
 }
 
 .macro ChangeScreenColor(color) {
