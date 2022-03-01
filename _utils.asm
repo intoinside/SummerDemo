@@ -10,6 +10,9 @@
     inc dest + 1
   !:
 }
+.assert "add16byte($cc, $0123) ", { add16byte($cc, $0123) }, {
+  clc; lda $0123; adc $cc; sta $0123; bcc !+; inc $0124; !:
+}
 
 .macro add16immediate(value, dest) {
     clc
