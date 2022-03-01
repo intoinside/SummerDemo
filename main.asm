@@ -13,7 +13,7 @@ Entry: {
 
     dec DrawWave.WaveDone
 
-    GetRandomUpTo(4)
+    GetRandomUpTo(20)
     sta rnd
     InitWave(rnd)
 

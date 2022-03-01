@@ -48,17 +48,11 @@
 }
 
 GetRandom: {
-    lda #$01
-    asl               
-    bcc Skip         
-    eor #$4d  
-
-  Skip:            
-    sta GetRandom + 1
-    eor $9124
+  !:
+    lda $9124
 
     cmp GeneratorMax
-    bmi GetRandom
+    bcs !-
 
     rts
 
